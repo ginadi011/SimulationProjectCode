@@ -1,0 +1,909 @@
+%% READ AND SORT DATA %% 
+clc;
+clearvars;
+close all;
+
+fileNames = unzip('yellowstone-groundstations-51items(1).zip');
+tables = cell(size(fileNames));
+ 
+for i = 1:size(fileNames,2)
+    tables{i} = readtable(fileNames{i}); 
+ end
+ 
+ myData = tables{1};
+ 
+ for i = 2:size(tables,2)
+     myData = vertcat(myData,tables{i});
+ end
+for j = 1:11
+    for i = 1:8812
+        if strcmp(myData(i,j),'\N');
+            myData(i,j) = '0';
+        end
+    end
+end
+snow_fract = table2array(myData(:,8));
+snow_fract = snow_fract(:);
+snow_fract = cellfun(@str2num,snow_fract);
+
+snow_depth = table2array(myData(:,6));
+snow_depth = snow_depth(:);
+for i = 1:8812
+    if strcmp(snow_depth(i),'\N');
+        snow_depth{i} = '0';
+    end
+end
+snow_depth = cellfun(@str2num,snow_depth);
+
+sensor_zenith = table2array(myData(:,11));
+sensor_zenith = sensor_zenith(:);
+sensor_zenith = cellfun(@str2num,sensor_zenith);
+
+solar_zenith = table2array(myData(:,10));
+solar_zenith = solar_zenith(:);
+solar_zenith = cellfun(@str2num,solar_zenith);
+
+%% SNOW FRACTION GRAPHS %%
+figure();
+%%%%%%%%%%%%%%%%                UNIFORM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+subplot(2,2,1);
+uniform = makedist('uniform','lower',min(snow_fract),'upper',max(snow_fract));
+domain = -50:1:500;
+range = pdf(uniform,domain);
+plot(domain,range,'linewidth',4)
+x = xlabel('Fractional Snow Cover');
+y = ylabel('Frequency');
+t = title('Uniform Fractional Snow Cover');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                EXPONENTIAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,2);
+exponential = fitdist(snow_fract,'exponential');
+domain = 0:1:500;
+range = pdf(exponential,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Fractional Snow Cover');
+y = ylabel('Frequency');
+t = title('Exponential Fractional Snow Cover');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                NORMAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,3);
+normal = fitdist(snow_fract,'normal');
+domain = -100:1:500;
+range = pdf(normal,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Fractional Snow Cover');
+y = ylabel('Frequency');
+t = title('Normal Fractional Snow Cover');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                HISTOGRAM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,4);
+histogram(snow_fract,75);
+x = xlabel('Fractional Snow Cover');
+y = ylabel('Frequency');
+t = title('Fractional Snow Cover Histogram');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+saveas(gcf,'SnowFractGraphz.png')
+%% SNOW DEPTH GRAPHS %%
+figure();
+
+%%%%%%%%%%%%%%%%                UNIFORM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+subplot(2,2,1);
+uniform = makedist('uniform','lower',min(snow_depth),'upper',max(snow_depth));
+domain = 0:1:300;
+range = pdf(uniform,domain);
+plot(domain,range,'linewidth',4)
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Uniform Snow Depth');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                EXPONENTIAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+subplot(2,2,2);
+exponential = fitdist(snow_depth,'exponential');
+domain = 0:1:500;
+range = pdf(exponential,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Exponential Snow Depth');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+
+ y = pdf(exponential)
+
+%%%%%%%%%%%%%%%%                NORMAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+subplot(2,2,3);
+normal = fitdist(snow_depth,'normal');
+domain = -20:1:200;
+range = pdf(normal,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Normal Snow Depth');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                HISTOGRAM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,4);
+histogram(snow_depth,30);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth Histogram');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+saveas(gcf,'SnowDepthGraphs.png')
+
+%% SENSOR ZENITH GRAPHS %%
+figure();
+
+%%%%%%%%%%%%%%%%                UNIFORM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+subplot(2,2,1);
+uniform = makedist('uniform','lower',min(sensor_zenith),'upper',max(sensor_zenith));
+domain = 0:1:100;
+range = pdf(uniform,domain);
+plot(domain,range,'linewidth',4)
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Uniform Sensor Zenith');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+
+
+%%%%%%%%%%%%%%%%                EXPONENTIAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,2);
+exponential = fitdist(sensor_zenith,'exponential');
+domain = 0:1:150;
+range = pdf(exponential,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Exponential Sensor Zenith');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                NORMAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,3);
+normal = fitdist(sensor_zenith,'normal');
+domain = -100:1:150;
+range = pdf(normal,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Normal Sensor Zenith');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                HISTOGRAM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,4);
+histogram(sensor_zenith),75;
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith Histogram');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+saveas(gcf,'SensorZenithGraphs.png')
+
+%% Solar ZENITH GRAPHS %%
+figure();
+
+%%%%%%%%%%%%%%%%                UNIFORM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+set(gcf, 'Position', get(0,'Screensize')); % Maximize figure.
+subplot(2,2,1);
+uniform = makedist('uniform','lower',min(solar_zenith),'upper',max(solar_zenith));
+domain = 0:1:100;
+range = pdf(uniform,domain);
+plot(domain,range,'linewidth',4)
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Uniform Solar Zenith');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+for t = 1:length(solar_zenith)
+    p = solar_zenith(t)
+end
+
+q = pdf(uniform,p)
+%%%%%%%%%%%%%%%%                EXPONENTIAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,2);
+exponential = fitdist(solar_zenith,'exponential');
+domain = 0:1:150;
+range = pdf(exponential,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Exponential Solar Zenith');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                NORMAL          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,3);
+normal = fitdist(solar_zenith,'normal');
+domain = -100:1:150;
+range = pdf(normal,domain);
+plot(domain,range,'linewidth',4);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Normal Solar Zenith');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+%%%%%%%%%%%%%%%%                HISTOGRAM          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+subplot(2,2,4);
+histogram(solar_zenith,75);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith Histogram');
+set([x,y,t],'fontweight','bold','fontsize',8);
+
+saveas(gcf,'SolarZnithGprath.png')
+
+
+
+%% PART III - SNOW FRACT%%%
+meanChart = [ 10,  2, 0;
+              10,  5, 0;
+              10, 10, 0;
+             100,  2, 0;
+             100,  5, 0;
+             100, 10, 0;
+             500,  2, 0;
+             500,  5, 0;
+             500, 10, 0];
+
+%%%%%%%%%%%%%%%%                Snow FRACTION, N = 10,           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+snow_frac_n10n2 = [];
+for i = 1:10
+    x = datasample(snow_fract,2);
+    snow_frac_n10n2 = [snow_frac_n10n2;x];
+end
+meanChart(1,3) = mean(snow_frac_n10n2);
+histogram(snow_frac_n10n2)
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 10, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+
+clearvars myArr;
+
+subplot(1,3,2);
+snow_frac_n10n5 = [];
+for i = 1:10
+    x = datasample(snow_fract,5);
+    snow_frac_n10n5 = [snow_frac_n10n5;x];
+end
+
+clearvars myArr;
+
+subplot(1,3,3);
+snow_frac_n10n10 = [];
+for i = 1:10
+    x = datasample(snow_fract,10);
+    snow_frac_n10n10 = [snow_frac_n10n10;x];
+end
+meanChart(3,3) = mean(snow_frac_n10n10);
+histogram(snow_frac_n10n10);
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 10, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+saveas(gcf,'snowfract_N10.png')
+
+clearvars myArr;
+
+%%%%%%%%%%%%%%%%                Snow FRACTION, N = 100, n = 10          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+snow_frac_n100n2 = [];
+for i = 1:100
+    x = datasample(snow_fract,2);
+    snow_frac_n100n2 = [snow_frac_n100n2;x];
+end
+meanChart(4,3) = mean(snow_frac_n100n2);
+histogram(snow_frac_n100n2)
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 100, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+snow_frac_n100n5 = [];
+for i = 1:100
+    x = datasample(snow_fract,5);
+    snow_frac_n100n5 = [snow_frac_n100n5;x];
+end
+meanChart(5,3) = mean(snow_frac_n100n5);
+histogram(snow_frac_n100n5);
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 100, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+snow_frac_n100n10 = [];
+for i = 1:100
+    x = datasample(snow_fract,10);
+    snow_frac_n100n10 = [snow_frac_n100n10;x];
+end
+meanChart(6,3) = mean(snow_frac_n100n10);
+histogram(snow_frac_n100n10);
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 100, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+saveas(gcf,'SnowFract_N100.png')
+
+clearvars myArr;
+
+%%%%%%%%%%%%%%%%                'Snow FRACTION, N = 500, n = 2'          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+snow_frac_n500n2 = [];
+for i = 1:500
+    x = datasample(snow_fract,2);
+    snow_frac_n500n2 = [snow_frac_n500n2;x];
+end
+meanChart(7,3) = mean(snow_frac_n500n2);
+histogram(snow_frac_n500n2)
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 500, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+snow_frac_n500n5 = [];
+for i = 1:500
+    x = datasample(snow_fract,5);
+    snow_frac_n500n5 = [snow_frac_n500n5;x];
+end
+meanChart(6,3) = mean(snow_frac_n500n5);
+histogram(snow_frac_n500n5);
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Fraction, N = 500, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+clearvars myArr;
+
+% subplot(1,3,3);
+snow_frac_n500n10 = [];
+for i = 1:500
+    x = datasample(snow_fract,10);
+    snow_frac_n500n10 = [snow_frac_n500n10;x];
+end
+
+
+saveas(gcf,'SnowFract_N500.png')
+
+%% PART III - SNOW DEPTH%%%
+meanChart = [ 10,  2, 0;
+              10,  5, 0;
+              10, 10, 0;
+             100,  2, 0;
+             100,  5, 0;
+             100, 10, 0;
+             500,  2, 0;
+             500,  5, 0;
+             500, 10, 0];
+
+%%%%%%%%%%%%%%%%                Snow Depth, N = 10, n = 10          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+
+subplot(1,3,1);
+snow_depth_n10n2 = [];
+for i = 1:10
+    x = datasample(snow_depth,2);
+    snow_depth_n10n2 = [snow_depth_n10n2;x];
+end
+meanChart(1,3) = mean(snow_depth_n10n2);
+histogram(snow_depth_n10n2)
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 10, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+snow_depth_n10n5 = [];
+for i = 1:10
+    x = datasample(snow_depth,5);
+    snow_depth_n10n5 = [snow_depth_n10n5;x];
+end
+meanChart(2,3) = mean(snow_depth_n10n5);
+histogram(snow_depth_n10n5);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 10, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+snow_depth_n10n10 = [];
+for i = 1:10
+    x = datasample(snow_depth,10);
+    snow_depth_n10n10 = [snow_depth_n10n10;x];
+end
+meanChart(3,3) = mean(snow_depth_n10n10);
+histogram(snow_depth_n10n10);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 10, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+subplot(1,1,1)
+y= [
+36.6877502083765,
+34.7743000507396,
+35.8878748613534,
+34.4622750416388,
+35.1729350250954,
+34.4230470068453,
+36.1647575387345,
+35.2312412543634,
+35.3284654998646
+];
+p = makedist('uniform',min(y),max(y));
+x = 10:1:60;
+uniform = pdf(p,x);
+plot(x,uniform,'linewidth',4)
+x = xlabel('Satellite Angle');
+y = ylabel('Frequency');
+t = title('Average Uniform Sensor Zenith');
+set(gca,'fontweight','bold','fontsize',6);
+
+saveas(gcf,'SnowDepth_N10.png')
+
+%%%%%%%%%%%%%%%%                Snow Depth, N = 100, n = 10          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+snow_depth_n100n2 = [];
+for i = 1:100
+    x = datasample(snow_depth,2);
+    snow_depth_n100n2 = [snow_depth_n100n2;x];
+end
+meanChart(4,3) = mean(snow_depth_n100n2);
+histogram(snow_depth_n100n2)
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 100, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+snow_depth_n100n5 = [];
+for i = 1:100
+    x = datasample(snow_depth,5);
+    snow_depth_n100n5 = [snow_depth_n100n5;x];
+end
+meanChart(5,3) = mean(snow_depth_n100n5);
+histogram(snow_depth_n100n5);
+x = xlabel('Snow depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 100, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+snow_depth_n100n10 = [];
+for i = 1:100
+    x = datasample(snow_depth,10);
+    snow_depth_n100n10 = [snow_depth_n100n10;x];
+end
+meanChart(6,3) = mean(snow_depth_n100n10);
+histogram(snow_depth_n100n10);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 100, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+saveas(gcf,'SnowDepth_N100.png')
+
+%%%%%%%%%%%%%%%%                'Snow Depth, N = 500, n = 2'          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+snow_depth_n500n2 = [];
+for i = 1:500
+    x = datasample(snow_depth,2);
+    snow_depth_n500n2 = [snow_depth_n500n2;x];
+end
+meanChart(7,3) = mean(snow_depth_n500n2);
+histogram(snow_depth_n500n2)
+x = xlabel('Snow Fraction');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 500, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+snow_depth_n500n5 = [];
+for i = 1:500
+    x = datasample(snow_depth,5);
+    snow_depth_n500n5 = [snow_depth_n500n5;x];
+end
+meanChart(6,3) = mean(snow_depth_n500n5);
+histogram(snow_depth_n500n5);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 500, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+snow_depth_n500n10 = [];
+for i = 1:500
+    x = datasample(snow_depth,10);
+    snow_depth_n500n10 = [snow_depth_n500n10;x];
+end
+meanChart(9,3) = mean(snow_depth_n500n10);
+histogram(snow_depth_n500n10);
+x = xlabel('Snow Depth');
+y = ylabel('Frequency');
+t = title('Snow Depth, N = 500, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+
+
+saveas(gcf,'SnowDepth_N500.png')
+
+%% PART III - sensor_zenith%%%
+meanChart = [ 10,  2, 0;
+              10,  5, 0;
+              10, 10, 0;
+             100,  2, 0;
+             100,  5, 0;
+             100, 10, 0;
+             500,  2, 0;
+             500,  5, 0;
+             500, 10, 0];
+
+%%%%%%%%%%%%%%%%                sensor_zenith, N = 10, n = 10          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+sensor_zenith_n10n2 = [];
+for i = 1:10
+    x = datasample(sensor_zenith,2);
+    sensor_zenith_n10n2 = [sensor_zenith_n10n2;x];
+end
+meanChart(1,3) = mean(sensor_zenith_n10n2);
+histogram(sensor_zenith_n10n2)
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 10, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+sensor_zenith_n10n5 = [];
+for i = 1:10
+    x = datasample(sensor_zenith,5);
+    sensor_zenith_n10n5 = [sensor_zenith_n10n5;x];
+end
+meanChart(2,3) = mean(sensor_zenith_n10n5);
+histogram(sensor_zenith_n10n5);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 10, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+sensor_zenith_n10n10 = [];
+for i = 1:10
+    x = datasample(sensor_zenith,10);
+    sensor_zenith_n10n10 = [sensor_zenith_n10n10;x];
+end
+meanChart(3,3) = mean(sensor_zenith_n10n10);
+histogram(sensor_zenith_n10n10);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 10, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+saveas(gcf,'SensorZenith_N10.png')
+
+%%%%%%%%%%%%%%%%                sensor_zenith, N = 100, n = 10          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+sensor_zenith_n100n2 = [];
+for i = 1:100
+    x = datasample(sensor_zenith,2);
+    sensor_zenith_n100n2 = [sensor_zenith_n100n2;x];
+end
+meanChart(4,3) = mean(sensor_zenith_n100n2);
+histogram(sensor_zenith_n100n2)
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 100, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+sensor_zenith_n100n5 = [];
+for i = 1:100
+    x = datasample(sensor_zenith,5);
+    sensor_zenith_n100n5 = [sensor_zenith_n100n5;x];
+end
+meanChart(5,3) = mean(sensor_zenith_n100n5);
+histogram(sensor_zenith_n100n5);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 100, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+sensor_zenith_n100n10 = [];
+for i = 1:100
+    x = datasample(sensor_zenith,10);
+    sensor_zenith_n100n10 = [sensor_zenith_n100n10;x];
+end
+meanChart(6,3) = mean(sensor_zenith_n100n10);
+histogram(sensor_zenith_n100n10);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 100, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+saveas(gcf,'SensorZenith_N100.png')
+
+%%%%%%%%%%%%%%%%                'Snowsensor_zenith, N = 500, n = 2'          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+sensor_zenith_n500n2 = [];
+for i = 1:500
+    x = datasample(sensor_zenith,2);
+    sensor_zenith_n500n2 = [sensor_zenith_n500n2;x];
+end
+meanChart(7,3) = mean(sensor_zenith_n500n2);
+histogram(sensor_zenith_n500n2)
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 500, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+sensor_zenith_n500n5 = [];
+for i = 1:500
+    x = datasample(sensor_zenith,5);
+    sensor_zenith_n500n5 = [sensor_zenith_n500n5;x];
+end
+meanChart(6,3) = mean(sensor_zenith_n500n5);
+histogram(sensor_zenith_n500n5);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 500, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+sensor_zenith_n500n10 = [];
+for i = 1:500
+    x = datasample(sensor_zenith,10);
+    sensor_zenith_n500n10 = [sensor_zenith_n500n10;x];
+end
+meanChart(9,3) = mean(sensor_zenith_n500n10);
+histogram(sensor_zenith_n500n10);
+x = xlabel('Scan Angle');
+y = ylabel('Frequency');
+t = title('Sensor Zenith, N = 500, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+
+saveas(gcf,'SensorZenith_N500.png')
+
+%% PART III - solar_zenith%%%
+meanChart = [ 10,  2, 0;
+              10,  5, 0;
+              10, 10, 0;
+             100,  2, 0;
+             100,  5, 0;
+             100, 10, 0;
+             500,  2, 0;
+             500,  5, 0;
+             500, 10, 0];
+
+%%%%%%%%%%%%%%%%                solar_zenith, N = 10,          %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+solar_zenith_n10n2 = [];
+for i = 1:10
+    x = datasample(solar_zenith,2);
+    solar_zenith_n10n2 = [solar_zenith_n10n2;x];
+end
+meanChart(1,3) = mean(solar_zenith_n10n2);
+histogram(solar_zenith_n10n2)
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 10, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+solar_zenith_n10n5 = [];
+for i = 1:10
+    x = datasample(solar_zenith,5);
+    solar_zenith_n10n5 = [solar_zenith_n10n5;x];
+end
+meanChart(2,3) = mean(solar_zenith_n10n5);
+histogram(solar_zenith_n10n5);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 10, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+solar_zenith_n10n10 = [];
+for i = 1:10
+    x = datasample(solar_zenith,10);
+    solar_zenith_n10n10 = [solar_zenith_n10n10;x];
+end
+meanChart(3,3) = mean(solar_zenith_n10n10);
+histogram(solar_zenith_n10n10);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 10, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+saveas(gcf,'SolarZenith_N10.png')
+
+%%%%%%%%%%%%%%%%                solar_zenith, N = 100,           %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+solar_zenith_n100n2 = [];
+for i = 1:100
+    x = datasample(solar_zenith,2);
+    solar_zenith_n100n2 = [solar_zenith_n100n2;x];
+end
+meanChart(4,3) = mean(solar_zenith_n100n2);
+histogram(solar_zenith_n100n2)
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 100, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+solar_zenith_n100n5 = [];
+for i = 1:100
+    x = datasample(solar_zenith,5);
+    solar_zenith_n100n5 = [solar_zenith_n100n5;x];
+end
+meanChart(5,3) = mean(solar_zenith_n100n5);
+histogram(solar_zenith_n100n5);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 100, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+solar_zenith_n100n10 = [];
+for i = 1:100
+    x = datasample(solar_zenith,10);
+    solar_zenith_n100n10 = [solar_zenith_n100n10;x];
+end
+meanChart(6,3) = mean(solar_zenith_n100n10);
+histogram(solar_zenith_n100n10);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 100, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+saveas(gcf,'SolarZenith_N100.png')
+
+%%%%%%%%%%%%%%%%                'solar_zenith, N = 500,        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+figure();
+
+subplot(1,3,1);
+solar_zenith_n500n2 = [];
+for i = 1:500
+    x = datasample(solar_zenith,2);
+    solar_zenith_n500n2 = [solar_zenith_n500n2;x];
+end
+meanChart(7,3) = mean(solar_zenith_n500n2);
+histogram(solar_zenith_n500n2)
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 500, n = 2');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,2);
+solar_zenith_n500n5 = [];
+for i = 1:500
+    x = datasample(solar_zenith,5);
+    solar_zenith_n500n5 = [solar_zenith_n500n5;x];
+end
+meanChart(6,3) = mean(solar_zenith_n500n5);
+histogram(solar_zenith_n500n5);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 500, n = 5');
+set(gca,'fontweight','bold','fontsize',6);
+
+clearvars myArr;
+
+subplot(1,3,3);
+solar_zenith_n500n10 = [];
+for i = 1:500
+    x = datasample(solar_zenith,10);
+    solar_zenith_n500n10 = [solar_zenith_n500n10;x];
+end
+meanChart(9,3) = mean(solar_zenith_n500n10);
+histogram(solar_zenith_n500n10);
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Solar Zenith, N = 500, n = 10');
+set(gca,'fontweight','bold','fontsize',6);
+clearvars myArr;
+subplot(1,1,1);
+
+
+x = reshape(o,9,1);
+ hist(x,10)
+x = xlabel('Sun Angle');
+y = ylabel('Frequency');
+t = title('Average Solar Zenith');
+set(gca,'fontweight','bold','fontsize',6);
+
+
+saveas(gcf,'SolarZenith_N500.png')
